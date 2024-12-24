@@ -56,3 +56,5 @@ tickers = [
 #   #   start_time = time.time()
 
 # close_price.to_csv('close_price_data.csv')
+
+
