@@ -11,12 +11,12 @@ close_price = pd.DataFrame()
 ticker_data = {}
 tickers = [
   "AAPL", 
-  # "MSFT", 
-  # "AMZN", 
-  # "GOOGL", 
-  # "GOOG", 
-  # "NVDA", 
-  # "TSLA"
+  "MSFT", 
+  "AMZN", 
+  "GOOGL", 
+  "GOOG", 
+  "NVDA", 
+  "TSLA"
 ]
 
 # # To make an array of close prices using yfinance
