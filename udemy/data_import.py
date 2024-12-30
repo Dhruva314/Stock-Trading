@@ -1,12 +1,15 @@
 import yfinance as yf
 import pandas as pd
 import datetime as dt
-import time
+import numpy as np
+import matplotlib.pyplot as plt
 
-from alpha_vantage.timeseries import TimeSeries
+# import time
+# from alpha_vantage.timeseries import TimeSeries
+year_period = 5
+end_date = dt.date.today()
 
-start_date = dt.date.today() - dt.timedelta(days = 365)
-end_date = dt.date.today
+start_date = end_date - dt.timedelta(days = 365*year_period)
 close_price = pd.DataFrame()
 ticker_data = {}
 tickers = [
@@ -16,18 +19,33 @@ tickers = [
   "GOOGL", 
   "GOOG", 
   "NVDA", 
-  "TSLA"
+  "TSLA",
+  "META"
 ]
 
-# # To make an array of close prices using yfinance
-# for ticker in tickers:
-#   close_price[f'{ticker}'] = yf.download(
-#     tickers = ticker,
-#     period = '6mo',
-#     interval= '1mo'
-#   )["Close"]
+# To make an array of close prices using yfinance
+for ticker in tickers:
+  close_price[f'{ticker}'] = yf.download(
+    tickers = ticker,
+    start = start_date,
+    end = end_date,
+    interval='3mo'
+  )["Close"]
 
-# close_price.to_csv('close_price_data.csv')
+close_price.fillna(value=0, inplace=True)
+log_change = np.log(close_price / close_price.shift(1))
+
+# Iterate over each row and column using `iterrows()`
+for index, row in log_change.iterrows():
+  for ticker in tickers:
+    if np.isinf(row[ticker]):  # Check if the value is 'inf'
+      log_change.at[index, ticker] = None  # Set the value to None
+
+log_change.plot()
+plt.savefig('plot.png')
+
+log_change.to_csv('log_change.csv')
+close_price.to_csv('close_price_data.csv')
 
 
 # # To make an array of all the data available from yfinance
