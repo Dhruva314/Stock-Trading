@@ -38,7 +38,7 @@ def BollBands(DF, window=14):
 def RSI(DF, n=14):
   "function to calculate RSI"
   df = DF.copy()
-  df["change"] = df["Adj Close"] - df["Adj Close"].shift(1)
+  df["change"] = df["Close"] - df["Close"].shift(1)
   df["gain"] = np.where(df["change"]>=0, df["change"], 0)
   df["loss"] = np.where(df["change"]<0, -1*df["change"], 0)
   df["avgGain"] = df["gain"].ewm(alpha=1/n, min_periods=n).mean()
