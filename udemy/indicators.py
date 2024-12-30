@@ -14,12 +14,23 @@ def MACD(DF, f_period=12, s_period=26, ewm_span=9):
   return df.loc[:,["macd","signal"]]
 
 def ATR(DF, ewm_span=14):
+  "function to calculate True Range and Average True Range"
   df = DF.copy()
-  return df
+  df["H-L"] = df["High"] - df["Low"]
+  df["H-PC"] = abs(df["High"] - df["Close"].shift(1))
+  df["L-PC"] = abs(df["Low"] - df["Close"].shift(1))
+  df["TR"] = df[["H-L","H-PC","L-PC"]].max(axis=1, skipna=False)
+  df["ATR"] = df["TR"].ewm(com=ewm_span, min_periods=ewm_span).mean()
+  return df["ATR"]
 
-def BollBands(DF, ewm_span=14):
+def BollBands(DF, window=14):
+  "function to calculate Bollinger Band"
   df = DF.copy()
-  return df
+  df["MB"] = df["Close"].rolling(window).mean()
+  df["UB"] = df["MB"] + 2*df["Close"].rolling(window).std(ddof=0)
+  df["LB"] = df["MB"] - 2*df["Close"].rolling(window).std(ddof=0)
+  df["BB_Width"] = df["UB"] - df["LB"]
+  return df[["MB","UB","LB","BB_Width"]]
 
 def RSI(DF, ewm_span=14):
   df = DF.copy()
