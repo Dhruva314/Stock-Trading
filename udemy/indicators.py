@@ -1,5 +1,8 @@
 # File with functions to calculate the value of common Technical Indicators (TI)
 
+import pandas as pd
+import numpy as np
+
 def MACD(DF, f_period=12, s_period=26, ewm_span=9):
   """function to calculate MACD
       typical values for:
@@ -32,13 +35,31 @@ def BollBands(DF, window=14):
   df["BB_Width"] = df["UB"] - df["LB"]
   return df[["MB","UB","LB","BB_Width"]]
 
-def RSI(DF, ewm_span=14):
+def RSI(DF, n=14):
+  "function to calculate RSI"
   df = DF.copy()
-  return df
+  df["change"] = df["Adj Close"] - df["Adj Close"].shift(1)
+  df["gain"] = np.where(df["change"]>=0, df["change"], 0)
+  df["loss"] = np.where(df["change"]<0, -1*df["change"], 0)
+  df["avgGain"] = df["gain"].ewm(alpha=1/n, min_periods=n).mean()
+  df["avgLoss"] = df["loss"].ewm(alpha=1/n, min_periods=n).mean()
+  df["rs"] = df["avgGain"]/df["avgLoss"]
+  df["rsi"] = 100 - (100/ (1 + df["rs"]))
+  return df["rsi"]
 
-def ADX(DF, ewm_span=20):
+
+def ADX(DF, n=20):
+  "function to calculate ADX"
   df = DF.copy()
-  return df
+  df["ATR"] = ATR(DF, n)
+  df["upmove"] = df["High"] - df["High"].shift(1)
+  df["downmove"] = df["Low"].shift(1) - df["Low"]
+  df["+dm"] = np.where((df["upmove"]>df["downmove"]) & (df["upmove"] >0), df["upmove"], 0)
+  df["-dm"] = np.where((df["downmove"]>df["upmove"]) & (df["downmove"] >0), df["downmove"], 0)
+  df["+di"] = 100 * (df["+dm"]/df["ATR"]).ewm(alpha=1/n, min_periods=n).mean()
+  df["-di"] = 100 * (df["-dm"]/df["ATR"]).ewm(alpha=1/n, min_periods=n).mean()
+  df["ADX"] = 100* abs((df["+di"] - df["-di"])/(df["+di"] + df["-di"])).ewm(alpha=1/n, min_periods=n).mean()
+  return df["ADX"]
 
 def Renko(DF, hourly_df):
   df = DF.copy()
