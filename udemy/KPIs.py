@@ -8,7 +8,7 @@ def CAGR(DF):
   df["return"] = DF["Close"].pct_change()
   df["cum_return"] = (1 + df["return"]).cumprod()
   n = len(df)/252
-  CAGR = (df["cum_return"][-1])**(1/n) - 1
+  CAGR = (df["cum_return"].iloc[-1])**(1/n) - 1
   return CAGR
 
 def volatility(DF):
@@ -30,11 +30,13 @@ def sortino(DF, rf):
   df["return"] = df["Close"].pct_change()
   # Removes positive returns
   neg_return = np.where(df["return"]>0,0,df["return"])
+
   # Calulates downward deviation approach where negative returns are penalised more
   neg_vol = np.sqrt((pd.Series(neg_return[neg_return != 0]) ** 2).mean() * 252)
   # Calculates the usual std of the regative returns
   #neg_vol = pd.Series(neg_return[neg_return != 0]).std() * np.sqrt(252)
-  return (CAGR(df) - rf)/neg_vol
+  
+  return (CAGR(DF) - rf)/neg_vol
 
 def max_dd(DF):
   "function to calculate max drawdown"

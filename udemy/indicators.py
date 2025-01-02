@@ -1,6 +1,5 @@
 # File with functions to calculate the value of common Technical Indicators (TI)
 
-import pandas as pd
 import numpy as np
 from stocktrends import Renko
 
@@ -70,11 +69,12 @@ def ADX(DF, n=20):
 def Renko_DF(DF, hourly_df, ticker):
   "function to convert ohlc data into renko bricks"
   temp = DF.copy()
-  df = temp.xs(ticker, axis=1, level='Ticker')
+  df = temp.xs(ticker, axis=1, level='Ticker').copy()
   df.reset_index(inplace=True)
   df.drop("Volume", axis=1, inplace=True)
   df.columns = ["date","close","high","low","open"]
   df2 = Renko(df)
+  # The period for hourly_df must be 120 days or longer
   df2.brick_size = 3*round(ATR(hourly_df,120).iloc[-1],0)
   renko_df = df2.get_ohlc_data()
   return renko_df
