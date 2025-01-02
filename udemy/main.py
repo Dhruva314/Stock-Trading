@@ -3,33 +3,57 @@ import KPIs as kpi
 import pandas as pd
 import yfinance as yf
 import os
+import shutil
+import pickle
 
 ohlcv_data =  {}
 hour_data = {}
 renko_data = {}
+tickers = []
 
 risk_free_rate = 0.03
 
-tickers = [
-  "AAPL", 
-  "MSFT", 
-  "AMZN", 
-  "GOOGL", 
-  "GOOG", 
-  "NVDA", 
-  "TSLA",
-  "META"
-]
+folder_path = "/home/dhruva/Stock-Trading/udemy/"
 
-# looping over tickers and storing OHLCV dataframe in dictionary
-for ticker in tickers:
-  temp = yf.download(ticker,period='1d',interval='15m')
-  temp.dropna(how="any",inplace=True)
-  ohlcv_data[ticker] = temp
+# Loop through all files in the folder and delete them
+for filename in os.listdir(folder_path+"exports"):
+  file_path = folder_path+"exports/"+filename
+  if os.path.isdir(file_path):
+    for filename2 in os.listdir(file_path):
+      os.remove(os.path.join(file_path, filename2))
+  else:
+    os.remove(file_path)
+    tickers.append(file_path)
 
-  temp = yf.download(ticker,period='1y',interval='1h')
-  temp.dropna(how="any",inplace=True)
-  hour_data[ticker] = temp
+with open(folder_path+"imports/ohlcv_data.pkl", "rb") as file:
+  ohlcv_data = pickle.load(file)
+
+with open(folder_path+"imports/hour_data.pkl", "rb") as file:
+  hour_data = pickle.load(file)
+
+# folder_path = '/home/dhruva/Stock-Trading/udemy/imports'
+# for file_name in os.listdir(folder_path+'/daily'):
+#   if file_name.endswith('.csv'):
+#     ohlcv_data[file_name] = pd.read_csv(folder_path+'/daily/'+file_name)
+#     tickers.append(file_name)
+
+# for file_name in os.listdir(folder_path+'/hourly'):
+#   if file_name.endswith('.csv'):
+#     hour_data[file_name] = pd.read_csv(folder_path+'/hourly/'+file_name)
+
+
+# print(ohlcv_data)
+# print(hour_data)
+
+# # looping over tickers and storing OHLCV dataframe in dictionary
+# for ticker in tickers:
+#   temp = yf.download(ticker,period='1d',interval='15m')
+#   temp.dropna(how="any",inplace=True)
+#   ohlcv_data[ticker] = temp
+
+#   temp = yf.download(ticker,period='1y',interval='1h')
+#   temp.dropna(how="any",inplace=True)
+#   hour_data[ticker] = temp
 
 for ticker in ohlcv_data:
   # Calculates MACD
@@ -47,6 +71,9 @@ for ticker in ohlcv_data:
   renko_data[ticker] = indi.Renko_DF(ohlcv_data[ticker],hour_data[ticker], ticker)
 
   # KPI Results
+  print('--------------------------------------------------------------------')
+  print(ticker)
+  print('-----------')
   print("CAGR of {} = {}".format(ticker,kpi.CAGR(ohlcv_data[ticker])))
   print("vol for {} = {}".format(ticker,kpi.volatility(ohlcv_data[ticker])))
   print("Sharpe of {} = {}".format(ticker,kpi.sharpe(ohlcv_data[ticker],risk_free_rate)))
@@ -56,7 +83,7 @@ for ticker in ohlcv_data:
 
 # print(ohlcv_data["AAPL"]["Close"].pct_change())
 
-path = "/home/dhruva/Stock-Trading/udemy/exports"
+path = folder_path+ "exports"
 for ticker, df in ohlcv_data.items():
   file_path = os.path.join(path, f"{ticker}.csv")
   df.to_csv(file_path, index=False)
