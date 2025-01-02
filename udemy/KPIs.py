@@ -38,11 +38,13 @@ def sortino(DF, rf):
 def max_dd(DF):
   "function to calculate max drawdown"
   df = DF.copy()
-
-  return df
+  df["return"] = df["Close"].pct_change()
+  df["cum_return"] = (1+df["return"]).cumprod()
+  df["cum_roll_max"] = df["cum_return"].cummax()
+  df["drawdown"] = df["cum_roll_max"] - df["cum_return"]
+  return (df["drawdown"]/df["cum_roll_max"]).max()
 
 def calmar(DF):
   "function to calculate calmar ratio"
   df = DF.copy()
-  
-  return df
+  return CAGR(df)/max_dd(df)
