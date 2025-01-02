@@ -2,6 +2,7 @@
 
 import pandas as pd
 import numpy as np
+from stocktrends import Renko
 
 def MACD(DF, f_period=12, s_period=26, ewm_span=9):
   """function to calculate MACD
@@ -66,7 +67,15 @@ def ADX(DF, n=20):
   df["ADX"] = 100* abs((df["+di"] - df["-di"])/(df["+di"] + df["-di"])).ewm(alpha=1/n, min_periods=n).mean()
   return df["ADX"]
 
-def Renko(DF, hourly_df):
-  df = DF.copy()
-  return df
+def Renko_DF(DF, hourly_df, ticker):
+  "function to convert ohlc data into renko bricks"
+  temp = DF.copy()
+  df = temp.xs(ticker, axis=1, level='Ticker')
+  df.reset_index(inplace=True)
+  df.drop("Volume", axis=1, inplace=True)
+  df.columns = ["date","close","high","low","open"]
+  df2 = Renko(df)
+  df2.brick_size = 3*round(ATR(hourly_df,120).iloc[-1],0)
+  renko_df = df2.get_ohlc_data()
+  return renko_df
 
