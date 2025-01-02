@@ -27,13 +27,18 @@ def ATR(DF, ewm_span=14):
   return df["ATR"]
 
 def BollBands(DF, window=14):
-  "function to calculate Bollinger Band"
+  "function to calculate Bollinger Band (2std)"
   df = DF.copy()
+
   df["MB"] = df["Close"].rolling(window).mean()
-  df["UB"] = df["MB"] + 2*df["Close"].rolling(window).std(ddof=0)
-  df["LB"] = df["MB"] - 2*df["Close"].rolling(window).std(ddof=0)
+  df["Std"] = df["Close"].rolling(window).std(ddof=0)
+
+  df["UB"] = df["MB"] + 2*df["Std"]
+  df["LB"] = df["MB"] - 2*df["Std"]
+
   df["BB_Width"] = df["UB"] - df["LB"]
-  return df[["MB","UB","LB","BB_Width"]]
+  
+  return df[["MB", "UB", "LB", "BB_Width"]]
 
 def RSI(DF, n=14):
   "function to calculate RSI"
