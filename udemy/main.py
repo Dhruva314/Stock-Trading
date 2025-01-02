@@ -1,9 +1,6 @@
 import indicators as indi
 import KPIs as kpi
-import pandas as pd
-import yfinance as yf
 import os
-import shutil
 import pickle
 
 ohlcv_data =  {}
@@ -16,6 +13,7 @@ risk_free_rate = 0.03
 folder_path = "/home/dhruva/Stock-Trading/udemy/"
 
 # Loop through all files in the folder and delete them
+# to remove old/redundant exports
 for filename in os.listdir(folder_path+"exports"):
   file_path = folder_path+"exports/"+filename
   if os.path.isdir(file_path):
@@ -30,30 +28,6 @@ with open(folder_path+"imports/ohlcv_data.pkl", "rb") as file:
 
 with open(folder_path+"imports/hour_data.pkl", "rb") as file:
   hour_data = pickle.load(file)
-
-# folder_path = '/home/dhruva/Stock-Trading/udemy/imports'
-# for file_name in os.listdir(folder_path+'/daily'):
-#   if file_name.endswith('.csv'):
-#     ohlcv_data[file_name] = pd.read_csv(folder_path+'/daily/'+file_name)
-#     tickers.append(file_name)
-
-# for file_name in os.listdir(folder_path+'/hourly'):
-#   if file_name.endswith('.csv'):
-#     hour_data[file_name] = pd.read_csv(folder_path+'/hourly/'+file_name)
-
-
-# print(ohlcv_data)
-# print(hour_data)
-
-# # looping over tickers and storing OHLCV dataframe in dictionary
-# for ticker in tickers:
-#   temp = yf.download(ticker,period='1d',interval='15m')
-#   temp.dropna(how="any",inplace=True)
-#   ohlcv_data[ticker] = temp
-
-#   temp = yf.download(ticker,period='1y',interval='1h')
-#   temp.dropna(how="any",inplace=True)
-#   hour_data[ticker] = temp
 
 for ticker in ohlcv_data:
   # Calculates MACD
@@ -80,8 +54,6 @@ for ticker in ohlcv_data:
   print("Sortino of {} = {}".format(ticker,kpi.sortino(ohlcv_data[ticker],risk_free_rate)))
   print("max drawdown of {} = {}".format(ticker,kpi.max_dd(ohlcv_data[ticker])))
   print("calmar ratio of {} = {}".format(ticker,kpi.calmar(ohlcv_data[ticker])))
-
-# print(ohlcv_data["AAPL"]["Close"].pct_change())
 
 path = folder_path+ "exports"
 for ticker, df in ohlcv_data.items():
