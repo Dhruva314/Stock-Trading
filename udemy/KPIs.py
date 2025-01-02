@@ -4,6 +4,7 @@ import pandas as pd
 def CAGR(DF):
   "function to calculate the Cumulative Annual Growth Rate of a trading strategy"
   df = DF.copy()
+  # Here the strategy used is buying and holding long until the end of the DF
   df["return"] = DF["Close"].pct_change()
   df["cum_return"] = (1 + df["return"]).cumprod()
   n = len(df)/252
